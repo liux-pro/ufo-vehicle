@@ -342,7 +342,7 @@ I (C:\Users\Legend\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cm
 I (C:\Users\Legend\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armcc.h)(0x60D3E8E2)
 I (.\Libraries\inc\system_cw32f030.h)(0x628E2D28)
 I (.\User\inc\interrupts_cw32f030.h)(0x6274DF67)
-F (.\User\src\main.c)(0x6290596E)(-c --cpu Cortex-M0+ -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I .\Libraries\inc -I .\User\inc -I .\Libraries-I.\RTE\_Project-IC:\Users\Legend\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Legend\AppData\Local\Arm\Packs\WHXY\CW32F030_DFP\1.0.1\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -D_RTE_-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
+F (.\User\src\main.c)(0x62906850)(-c --cpu Cortex-M0+ -D__MICROLIB -g -O0 --apcs=interwork --split_sections -I .\Libraries\inc -I .\User\inc -I .\Libraries-I.\RTE\_Project-IC:\Users\Legend\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include-IC:\Users\Legend\AppData\Local\Arm\Packs\WHXY\CW32F030_DFP\1.0.1\Device\Include-D__UVISION_VERSION="536" -D_RTE_ -D_RTE_-o .\objects\main.o --omf_browse .\objects\main.crf --depend .\objects\main.d)
 I (.\User\inc\main.h)(0x6274DF67)
 I (.\Libraries\inc\base_types.h)(0x628E2D28)
 I (C:\Keil_v5\ARM\ARMCC\include\stdio.h)(0x60252374)

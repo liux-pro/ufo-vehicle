@@ -64,7 +64,7 @@
 
 uint8_t spi_buffer[1024] = {
         CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1,
+        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
         CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
 
         CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
@@ -108,16 +108,15 @@ int32_t main(void) {
 
     //貌似会自动初始flash总线，这行不要也行
     RCC_AHBPeriphClk_Enable(RCC_AHB_PERIPH_FLASH, ENABLE);
-    FLASH_SetLatency(FLASH_Latency_2);
+    //flash等会频率会上到64m，太快flash反应不过来，加这句表示加点延迟,等等flash，
+    FLASH_SetLatency(FLASH_Latency_3);
 
-    //内部是48M
-    //SYSCLK = HSI = 24MHz = HCLK = PCLK
+    //内部rc振荡器是48M，3分频，到16M
     RCC_HSI_Enable(RCC_HSIOSC_DIV3);
 
-
-    //以下从HSI切换到PLL
+    //用pll把内部rc频率提升4倍，到64M
     RCC_PLL_Enable(RCC_PLLSOURCE_HSI, 16000000, RCC_PLL_MUL_4);    //开启PLL，PLL源为HSI
-    FLASH_SetLatency(FLASH_Latency_2);    //频率大于24M需要配置FlashWait=2
+    //以下从内部时钟源HSI切换到PLL
     RCC_SysClk_Switch(RCC_SYSCLKSRC_PLL);                    //切换系统时钟到PLL
 
 
@@ -170,7 +169,7 @@ int32_t main(void) {
     SPI_InitStructure.SPI_CPOL = SPI_CPOL_Low;                            // 时钟空闲电平为低
     SPI_InitStructure.SPI_CPHA = SPI_CPHA_1Edge;                          // 第一个边沿采样
     SPI_InitStructure.SPI_NSS = SPI_NSS_Soft;                             // 片选信号由SSI寄存器控制
-    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;    // 波特率为PCLK的8分频
+    SPI_InitStructure.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_8;    // 波特率为PCLK的8分频。64/8=8M
     SPI_InitStructure.SPI_FirstBit = SPI_FirstBit_MSB;                    // 最高有效位 MSB 收发在前
     SPI_InitStructure.SPI_Speed = SPI_Speed_Low;                          // 低速SPI
 
