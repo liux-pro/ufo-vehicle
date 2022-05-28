@@ -25,6 +25,7 @@
 ".\objects\cw32f030_wwdt.o"
 ".\objects\interrupts_cw32f030.o"
 ".\objects\main.o"
+".\objects\ws2812.o"
 --library_type=microlib --strict --scatter ".\Objects\cw32f030c8t6.sct"
 --summary_stderr --info summarysizes --map --load_addr_map_info --xref --callgraph --symbols
 --info sizes --info totals --info unused --info veneers

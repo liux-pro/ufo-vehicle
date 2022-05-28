@@ -13,9 +13,11 @@
 .\objects\main.o: C:\Users\Legend\AppData\Local\Arm\Packs\ARM\CMSIS\5.8.0\CMSIS\Core\Include\cmsis_armcc.h
 .\objects\main.o: .\Libraries\inc\system_cw32f030.h
 .\objects\main.o: .\User\inc\interrupts_cw32f030.h
+.\objects\main.o: .\User\inc\ws2812.h
+.\objects\main.o: C:\Keil_v5\ARM\ARMCC\Bin\..\include\stdbool.h
 .\objects\main.o: .\Libraries\inc\cw32f030_gpio.h
-.\objects\main.o: .\Libraries\inc\cw32f030_rcc.h
-.\objects\main.o: .\Libraries\inc\cw32f030_systick.h
 .\objects\main.o: .\Libraries\inc\cw32f030_spi.h
 .\objects\main.o: .\Libraries\inc\cw32f030_dma.h
 .\objects\main.o: .\Libraries\inc\cw32f030_flash.h
+.\objects\main.o: .\Libraries\inc\cw32f030_rcc.h
+.\objects\main.o: .\Libraries\inc\cw32f030_systick.h
