@@ -527,6 +527,16 @@
               <FileType>1</FileType>
               <FilePath>.\User\src\ws2812.c</FilePath>
             </File>
+            <File>
+              <FileName>pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\src\pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>clock.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\src\clock.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

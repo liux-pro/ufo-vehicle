@@ -2,6 +2,7 @@
  * Include files
  ******************************************************************************/
 #include "main.h"
+#include "clock.h"
 #include "ws2812.h"
 #include "cw32f030_gpio.h"
 #include "cw32f030_rcc.h"
@@ -55,72 +56,19 @@
  **
  ******************************************************************************/
 
-//spi模拟0码 1100 0000
-#define CODE0  0XC0
-//spi模拟1码 1111 1100
-#define CODE1  0xFC
-
-uint8_t spi_buffer[1024] = {
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-
-        CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1,
-
-
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0,
-        CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1, CODE1,
-        CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0, CODE0
-
-};
-// uint8_t spi_buffer[1024] = {
-// 0xAA
-
-// };
-
 
 
 int32_t main(void) {
-    //貌似会自动初始flash总线，这行不要也行
-    RCC_AHBPeriphClk_Enable(RCC_AHB_PERIPH_FLASH, ENABLE);
-    //flash等会频率会上到64m，太快flash反应不过来，加这句表示加点延迟,等等flash，
-    FLASH_SetLatency(FLASH_Latency_3);
-
-    //内部rc振荡器是48M，3分频，到16M
-    RCC_HSI_Enable(RCC_HSIOSC_DIV3);
-
-    //用pll把内部rc频率提升4倍，到64M
-    RCC_PLL_Enable(RCC_PLLSOURCE_HSI, 16000000, RCC_PLL_MUL_4);    //开启PLL，PLL源为HSI
-    //以下从内部时钟源HSI切换到PLL
-    RCC_SysClk_Switch(RCC_SYSCLKSRC_PLL);                    //切换系统时钟到PLL
-
-
-
-
+    set_clock_64m();
     ws2812_init();
     ws2812_red();
-    ws2812_blue();
+    ws2812_green();
+    ws2812_black();
+    ws2812_set_color(0,255,0,0);
     ws2812_send_sync();
-
-
+    ws2812_set_color(0,0,255,0);
+    delay100us(1);
+    ws2812_send_sync();
 }
 
 

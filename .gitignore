@@ -1,5 +1,6 @@
 cmake-build-debug
 .idea
+.vscode
 Listings
 Objects
 uv4.log
