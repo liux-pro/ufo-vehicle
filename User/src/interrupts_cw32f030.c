@@ -315,15 +315,15 @@ void GTIM4_IRQHandler(void)
   /* USER CODE END */
 }
 
-/**
- * @brief This funcation handles BTIM1
- */
-void BTIM1_IRQHandler(void)
-{
-  /* USER CODE BEGIN */
-
-  /* USER CODE END */
-}
+///**
+// * @brief This funcation handles BTIM1
+// */
+//void BTIM1_IRQHandler(void)
+//{
+//  /* USER CODE BEGIN */
+//
+//  /* USER CODE END */
+//}
 
 /**
  * @brief This funcation handles BTIM2
@@ -405,15 +405,15 @@ void UART2_IRQHandler(void)
   /* USER CODE END */
 }
 
-/**
- * @brief This funcation handles UART3
- */
-void UART3_IRQHandler(void)
-{
-  /* USER CODE BEGIN */
-
-  /* USER CODE END */
-}
+///**
+// * @brief This funcation handles UART3
+// */
+//void UART3_IRQHandler(void)
+//{
+//  /* USER CODE BEGIN */
+//
+//  /* USER CODE END */
+//}
 
 /**
  * @brief This funcation handles AWT

@@ -10,7 +10,7 @@ static uint8_t buffer[TOTAL] = {0};
 volatile bool ws2812_busy = false;
 
 
-//初始化spi，参数已经自动生成了，所以这里没参数
+//初始化spi
 void ws2812_init() {
     //初始化spi
     GPIO_InitTypeDef GPIO_InitStructure;

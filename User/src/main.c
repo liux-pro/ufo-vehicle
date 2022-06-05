@@ -4,12 +4,15 @@
 #include "main.h"
 #include "clock.h"
 #include "ws2812.h"
+#include "pwm.h"
+#include "ble.h"
 #include "cw32f030_gpio.h"
 #include "cw32f030_rcc.h"
 #include "cw32f030_systick.h"
 #include "cw32f030_spi.h"
 #include "cw32f030_dma.h"
 #include "cw32f030_flash.h"
+#include "cw32f030_btim.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -60,15 +63,36 @@
 
 int32_t main(void) {
     set_clock_64m();
+
+//    pwm_init();
+//    pwm1_set_duty(100);
+//    pwm2_set_duty(200);
+
     ws2812_init();
     ws2812_red();
     ws2812_green();
     ws2812_black();
-    ws2812_set_color(0,255,0,0);
+    ws2812_set_color(0, 255, 0, 0);
     ws2812_send_sync();
-    ws2812_set_color(0,0,255,0);
+    ws2812_set_color(0, 0, 255, 0);
     delay100us(1);
     ws2812_send_sync();
+    ble_init();
+    bool flag = false;
+    while (1){
+        static uint8_t *ble_data;
+        static uint16_t ble_data_len;
+        if(ble_get_data(&ble_data,&ble_data_len)){
+            if (flag){
+                ws2812_set_color(0, 255, 0, 0);
+            } else{
+                ws2812_set_color(0, 0, 255, 0);
+            }
+            ws2812_send_sync();
+            delay100us(1);
+            flag=!flag;
+        }
+    }
 }
 
 

@@ -537,6 +537,11 @@
               <FileType>1</FileType>
               <FilePath>.\User\src\clock.c</FilePath>
             </File>
+            <File>
+              <FileName>ble.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\src\ble.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

@@ -25,7 +25,7 @@
 
 
 //LED 灯珠数量 不要超内存
-#define LED_NUMBER 1
+#define LED_NUMBER 8
 //显存需要TOTAl个字节的内存
 #define TOTAL   LED_NUMBER * 24
 
