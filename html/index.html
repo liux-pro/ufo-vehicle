@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="user-scalable=0"/>
+
+    <title>飞碟车</title>
+    <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.js"></script>
+    <!--仪表盘组件-->
+    <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/gauge.js/1.3.7/gauge.min.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+        }
+
+        #app {
+            position: absolute;
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            background-color: white;
+        }
+
+        .joy-stick {
+            position: fixed;
+            bottom: 10vw;
+            left: 10vw;
+            background-color: gray;
+            width: 15vw;
+            height: 15vw;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+
+        .joy-stick-core {
+            position: fixed;
+            bottom: 15vw;
+            left: 15vw;
+            background-color: red;
+            width: 5vw;
+            height: 5vw;
+            border-radius: 50%;
+            opacity: 1;
+            z-index: 2;
+        }
+
+        #accelerator {
+            z-index: 1;
+            width: 100vw;
+            height: 50vh;
+            margin: 0 auto;
+            align-self: center;
+        }
+
+        #header {
+            position: fixed;
+            z-index: 1;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+        }
+
+
+    </style>
+</head>
+<body>
+<div id="header">
+    <canvas id="accelerator"></canvas>
+</div>
+
+<div id="app">
+
+    <!--    手柄底盘透明度，按下后透明度降低-->
+    <div :style="{opacity:(Math.abs(virtual_joystick_x)<0.01 && Math.abs(virtual_joystick_y)<0.01)?0.4:0.7 }"
+         class="joy-stick"></div>
+    <div :style="{left:(joy_ux + virtual_joystick_x - 2.5 * vw)+'px',top:(joy_uy + virtual_joystick_y - 2.5 * vw)+'px'}"
+         class="joy-stick joy-stick-core"></div>
+
+
+</div>
+<script>
+    const opts = {
+        angle: -0.2, // The span of the gauge arc
+        lineWidth: 0.2, // The line thickness
+        radiusScale: 1, // Relative radius
+        pointer: {
+            length: 0.5, // // Relative to gauge radius
+            strokeWidth: 0.035, // The thickness
+            color: '#000000' // Fill color
+        },
+        limitMax: false,     // If false, max value increases automatically if value > maxValue
+        limitMin: false,     // If true, the min value of the gauge will be fixed
+        colorStart: '#ff0000',   // Colors
+        colorStop: '#ff0000',    // just experiment with them
+        strokeColor: '#E0E0E0',  // to see which ones work best for you
+        generateGradient: true,
+        highDpiSupport: true,     // High resolution support
+
+    };
+    const target = document.getElementById('accelerator'); // your canvas element
+    const gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
+    gauge.maxValue = 3000; // set max gauge value
+    gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
+    gauge.animationSpeed =  48; // set animation speed (32 is default value)
+    gauge.set(0); // set actual value
+
+    const app = new Vue({
+            el: '#app',
+            data: {
+                virtual_joystick_x: 0,
+                virtual_joystick_y: 0,
+                x: 0,
+                y: 0,
+                accelerator: 0
+            }
+            , computed: {
+                vw: function () {
+                    return document.documentElement.clientWidth / 100
+                },
+                joy_r: function () {
+                    return 7.5 * this.vw
+                },
+                joy_ux: function () {
+                    return 17.5 * this.vw
+                },
+                joy_uy: function () {
+                    return this.clientHeight - 17.5 * this.vw
+                },
+                clientWidth: function () {
+                    return document.documentElement.clientWidth
+                },
+                clientHeight: function () {
+                    return document.documentElement.clientHeight
+                }
+            },
+            watch: {
+                accelerator: function (newVal, oldVal) {
+                    gauge.set(newVal * 3000)
+                }
+            }
+            ,
+            methods: {
+                handleStart: function (e) {
+                    console.log(e)
+                    //按下的是虚拟手柄区域
+                    if (e.target.classList.contains("joy-stick")) {
+                        // 兼容鼠标
+                        let x = e.changedTouches[0].pageX
+                        let y = e.changedTouches[0].pageY
+                        this.setStickPos(x, y)
+                    }
+                },
+
+                handleEnd: function (e) {
+                    this.setStickPosRelative(0, 0)
+                },
+
+                handleMove: function (e) {
+                    if (e.target.classList.contains("joy-stick")) {
+                        let x = e.changedTouches[0].pageX
+                        let y = e.changedTouches[0].pageY
+                        this.setStickPos(x, y)
+                    }
+                },
+                //以屏幕左上角为原点的坐标系
+                setStickPos: function (x, y) {
+                    // 限制小圆点在大大圆球内部
+                    // 大三角形两个直角边长度
+                    let Lx = x - this.joy_ux;
+                    let Ly = y - this.joy_uy;
+                    // 大三角形斜边长度
+                    let H = Math.sqrt(Lx * Lx + Ly * Ly)
+                    //如果触摸点超过了大圆的范围，限制小圆的位置
+                    if (H > this.joy_r) {
+                        x = this.joy_r / H * Lx
+                        y = this.joy_r / H * Ly
+                        this.setStickPosRelative(x, y)
+                    } else {
+                        //如果没有超过，直接设置小球位置为鼠标位置
+                        this.setStickPosRelative(Lx, Ly)
+                    }
+                },
+                //以大圆圆心为原点的坐标系,传入小圆圆心坐标，从而设置小圆位置
+                setStickPosRelative: function (x, y) {
+                    this.virtual_joystick_x = x
+                    this.virtual_joystick_y = y
+                },
+                //以大圆圆心为原点的坐标系,传入小圆圆心坐标，从而设置小圆位置
+                getGamePadData: function () {
+                    let gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
+                    if (!gamepads) {
+                        return;
+                    }
+                    //左上角摇杆 横向 -1到1 向右为正
+                    // console.log(gamepads[0].axes[0])
+                    this.virtual_joystick_x = gamepads[0].axes[0] * 7.5 * this.vw
+                    //左上角摇杆 纵向 -1到1 向下为正
+                    this.virtual_joystick_y = gamepads[0].axes[1] * 7.5 * this.vw
+                    //RT  手边右上角下边的键  0到1
+                    this.accelerator = gamepads[0].buttons[7].value
+                    window.requestAnimationFrame(this.getGamePadData);
+                }
+
+            },
+            created() {
+                let el = document.querySelector("body");
+                el.addEventListener("touchstart", this.handleStart, false);
+                el.addEventListener("touchend", this.handleEnd, false);
+                el.addEventListener("touchmove", this.handleMove, false);
+                //计算初始位置
+                this.setStickPosRelative(0, 0)
+
+                let getGamePadData = this.getGamePadData
+                window.addEventListener("gamepadconnected", (event) => {
+                    console.log("A gamepad connected:");
+                    console.log(event.gamepad);
+                    window.requestAnimationFrame(getGamePadData);
+                });
+                window.addEventListener("gamepaddisconnected", (event) => {
+                    console.log("A gamepad disconnected:");
+                    console.log(event.gamepad);
+                    window.cancelIdleCallback(getGamePadData);
+                });
+
+            }
+        })
+    ;
+</script>
+</body>
+</html>
