@@ -4,7 +4,7 @@
 /*
  * 系统主频需为64m，pwm频率10k
  * 初始化两个pwm
- * PWM1 = GTIM1_CH1 PA6
+ * PWM1 = GTIM1_CH4 PB1
  * PWM2 = GTIM2_CH1 PA5
  */
 
@@ -16,12 +16,14 @@
 void pwm_init(){
     //开启GPIO A 总线
     __RCC_GPIOA_CLK_ENABLE();
+    __RCC_GPIOB_CLK_ENABLE();
 
-    PA06_AFx_GTIM1CH1();
-    PA06_DIGTAL_ENABLE();
-    PA06_DIR_OUTPUT();
-    PA06_PUSHPULL_ENABLE();
-    PA06_SPEED_HIGH();
+
+    PB01_AFx_GTIM1CH4();
+    PB01_DIGTAL_ENABLE();
+    PB01_DIR_OUTPUT();
+    PB01_PUSHPULL_ENABLE();
+    PB01_SPEED_HIGH();
 
     PA05_AFx_GTIM2CH1();
     PA05_DIGTAL_ENABLE();
@@ -45,7 +47,7 @@ void pwm_init(){
 
     __RCC_GTIM1_CLK_ENABLE();
     GTIM_TimeBaseInit(CW_GTIM1, &GTIM_InitStruct);
-    GTIM_OCInit(CW_GTIM1, GTIM_CHANNEL1, GTIM_OC_OUTPUT_PWM_LOW);
+    GTIM_OCInit(CW_GTIM1, GTIM_CHANNEL4, GTIM_OC_OUTPUT_PWM_LOW);
     GTIM_SetCompare1(CW_GTIM1, 0);
     GTIM_Cmd(CW_GTIM1, ENABLE);
 
@@ -54,10 +56,13 @@ void pwm_init(){
     GTIM_OCInit(CW_GTIM2, GTIM_CHANNEL1, GTIM_OC_OUTPUT_PWM_LOW);
     GTIM_SetCompare1(CW_GTIM2, 0);
     GTIM_Cmd(CW_GTIM2, ENABLE);
+
+    pwm1_set_duty(0);
+    pwm2_set_duty(0);
 }
 
 void pwm1_set_duty(uint8_t duty){
-    GTIM_SetCompare1(CW_GTIM1, SINGLE*duty);
+    GTIM_SetCompare4(CW_GTIM1, SINGLE*duty);
 }
 
 void pwm2_set_duty(uint8_t duty){

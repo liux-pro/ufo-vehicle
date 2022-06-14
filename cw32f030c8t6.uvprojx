@@ -542,6 +542,11 @@
               <FileType>1</FileType>
               <FilePath>.\User\src\ble.c</FilePath>
             </File>
+            <File>
+              <FileName>motor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\src\motor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -563,5 +568,14 @@
     </components>
     <files/>
   </RTE>
+
+  <LayerInfo>
+    <Layers>
+      <Layer>
+        <LayName>cw32f030c8t6</LayName>
+        <LayPrjMark>1</LayPrjMark>
+      </Layer>
+    </Layers>
+  </LayerInfo>
 
 </Project>
