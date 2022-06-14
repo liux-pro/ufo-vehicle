@@ -8,9 +8,13 @@
     <script src="https://lf26-cdn-tos.bytecdntp.com/cdn/expire-1-M/vue/2.6.14/vue.js"></script>
     <!--仪表盘组件-->
     <script src="https://lf6-cdn-tos.bytecdntp.com/cdn/expire-1-M/gauge.js/1.3.7/gauge.min.js"></script>
+    <!--svg注入插件-->
+    <script src="https://lf3-cdn-tos.bytecdntp.com/cdn/expire-1-M/svg-injector/1.1.3/svg-injector.min.js"></script>
+    <script src="ble.js"></script>
     <style>
         html, body {
             margin: 0;
+            background-color: rgb(50, 50, 50);
         }
 
         #app {
@@ -18,7 +22,6 @@
             height: 100%;
             width: 100%;
             margin: 0;
-            background-color: white;
         }
 
         .joy-stick {
@@ -40,7 +43,7 @@
             width: 5vw;
             height: 5vw;
             border-radius: 50%;
-            opacity: 1;
+            opacity: 0.5;
             z-index: 2;
         }
 
@@ -60,6 +63,33 @@
             flex-direction: column;
         }
 
+        #btn {
+            margin: 20px;
+            z-index: 100;
+            position: fixed;
+        }
+
+        #btn button {
+            width: 10vw;
+            height: 5vw;
+            font-size: 2vw;
+            font-weight: bold;
+        }
+
+        .rocket {
+            position: fixed;
+            bottom: 10vw;
+            right: 10vw;
+            width: 15vw;
+            height: 15vw;
+            fill: red;
+            opacity: 0.5;
+        }
+
+        img.rocket {
+            /*在svg注入之前，会显示个图片加载失败，不知道为啥，先把他隐藏吧*/
+            display: none;
+        }
 
     </style>
 </head>
@@ -69,13 +99,22 @@
 </div>
 
 <div id="app">
-
-    <!--    手柄底盘透明度，按下后透明度降低-->
-    <div :style="{opacity:(Math.abs(virtual_joystick_x)<0.01 && Math.abs(virtual_joystick_y)<0.01)?0.4:0.7 }"
-         class="joy-stick"></div>
-    <div :style="{left:(joy_ux + virtual_joystick_x - 2.5 * vw)+'px',top:(joy_uy + virtual_joystick_y - 2.5 * vw)+'px'}"
-         class="joy-stick joy-stick-core"></div>
-
+    <div id="btn">
+        <button @click="connect">连接蓝牙</button>
+        <button @click="read">读取</button>
+        <button @click="write">写入</button>
+    </div>
+<!--v-show="!useGamePad"-->
+    <div>
+        <!--    手柄底盘透明度，按下后透明度降低-->
+        <div :style="{opacity:(Math.abs(virtual_joystick_x)<0.01 && Math.abs(virtual_joystick_y)<0.01)?0.4:0.7 }"
+             class="joy-stick"></div>
+        <div :style="{left:(joy_ux + virtual_joystick_x - 2.5 * vw)+'px',
+                        top:(joy_uy + virtual_joystick_y - 2.5 * vw)+'px',
+                        opacity:(Math.abs(virtual_joystick_x)<0.01 && Math.abs(virtual_joystick_y)<0.01)?0.5:1}"
+             class="joy-stick joy-stick-core"></div>
+        <img src="rocket.svg" class="rocket" alt="加速" onload="SVGInjector(this);">
+    </div>
 
 </div>
 <script>
@@ -92,7 +131,7 @@
         limitMin: false,     // If true, the min value of the gauge will be fixed
         colorStart: '#ff0000',   // Colors
         colorStop: '#ff0000',    // just experiment with them
-        strokeColor: '#E0E0E0',  // to see which ones work best for you
+        strokeColor: '#222222',  // to see which ones work best for you
         generateGradient: true,
         highDpiSupport: true,     // High resolution support
 
@@ -101,7 +140,7 @@
     const gauge = new Gauge(target).setOptions(opts); // create sexy gauge!
     gauge.maxValue = 3000; // set max gauge value
     gauge.setMinValue(0);  // Prefer setter over gauge.minValue = 0
-    gauge.animationSpeed =  48; // set animation speed (32 is default value)
+    gauge.animationSpeed = 4; // set animation speed (32 is default value)
     gauge.set(0); // set actual value
 
     const app = new Vue({
@@ -111,7 +150,9 @@
                 virtual_joystick_y: 0,
                 x: 0,
                 y: 0,
-                accelerator: 0
+                accelerator: 0,
+                rocket: false,
+                useGamePad: false
             }
             , computed: {
                 vw: function () {
@@ -141,25 +182,50 @@
             ,
             methods: {
                 handleStart: function (e) {
-                    console.log(e)
                     //按下的是虚拟手柄区域
                     if (e.target.classList.contains("joy-stick")) {
                         // 兼容鼠标
-                        let x = e.changedTouches[0].pageX
-                        let y = e.changedTouches[0].pageY
+                        let x = e.targetTouches[0].pageX
+                        let y = e.targetTouches[0].pageY
                         this.setStickPos(x, y)
+                    }
+                    if (e.path[0].classList.contains("rocket")) {
+                        e.path[0].style.opacity = "0.9"
+                        this.rocket = true
+                    }
+                    if (e.path[1].classList.contains("rocket")) {
+                        e.path[1].style.opacity = "0.9"
+                        this.rocket = true
                     }
                 },
 
                 handleEnd: function (e) {
-                    this.setStickPosRelative(0, 0)
+                    if (e.target.classList.contains("joy-stick")) {
+                        this.setStickPosRelative(0, 0)
+                    }
+                    if (e.path[0].classList.contains("rocket")) {
+                        e.path[0].style.opacity = "0.5"
+                        this.rocket = false
+                    }
+                    if (e.path[1].classList.contains("rocket")) {
+                        e.path[1].style.opacity = "0.5"
+                        this.rocket = false
+                    }
                 },
 
                 handleMove: function (e) {
                     if (e.target.classList.contains("joy-stick")) {
-                        let x = e.changedTouches[0].pageX
-                        let y = e.changedTouches[0].pageY
+                        let x = e.targetTouches[0].pageX
+                        let y = e.targetTouches[0].pageY
                         this.setStickPos(x, y)
+                    }
+                    if (e.path[0].classList.contains("rocket")) {
+                        e.path[0].style.opacity = "0.9"
+                        this.rocket = true
+                    }
+                    if (e.path[1].classList.contains("rocket")) {
+                        e.path[1].style.opacity = "0.9"
+                        this.rocket = true
                     }
                 },
                 //以屏幕左上角为原点的坐标系
@@ -198,9 +264,19 @@
                     this.virtual_joystick_y = gamepads[0].axes[1] * 7.5 * this.vw
                     //RT  手边右上角下边的键  0到1
                     this.accelerator = gamepads[0].buttons[7].value
-                    window.requestAnimationFrame(this.getGamePadData);
-                }
+                    console.log(gamepads[0].buttons[7])
 
+                    window.requestAnimationFrame(this.getGamePadData);
+                },
+                connect: function () {
+                    ble_init("SuperClock")
+                },
+                read: function () {
+                    ble_read()
+                },
+                write: function () {
+                    ble_write()
+                }
             },
             created() {
                 let el = document.querySelector("body");
@@ -210,16 +286,40 @@
                 //计算初始位置
                 this.setStickPosRelative(0, 0)
 
+                //手柄
                 let getGamePadData = this.getGamePadData
+                let that = this
                 window.addEventListener("gamepadconnected", (event) => {
                     console.log("A gamepad connected:");
                     console.log(event.gamepad);
                     window.requestAnimationFrame(getGamePadData);
+                    that.useGamePad = true
                 });
                 window.addEventListener("gamepaddisconnected", (event) => {
                     console.log("A gamepad disconnected:");
                     console.log(event.gamepad);
                     window.cancelIdleCallback(getGamePadData);
+                    that.useGamePad = false
+                });
+                //按下油门时加速
+                window.requestAnimationFrame(function accelerate() {
+                    if (that.rocket) {
+                        let temp = that.accelerator + 0.01
+                        if (temp > 1) {
+                            that.accelerator = 1
+                        } else {
+                            that.accelerator = temp
+                        }
+                    } else {
+                        // let temp = that.accelerator - 0.01
+                        // if (temp <= 0) {
+                        //     that.accelerator = 0
+                        // } else {
+                        //     that.accelerator = temp
+                        // }
+                        that.accelerator = 0
+                    }
+                    window.requestAnimationFrame(accelerate)
                 });
 
             }
