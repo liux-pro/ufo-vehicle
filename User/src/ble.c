@@ -56,10 +56,10 @@ void ble_send_sync(uint8_t *buffer, uint16_t len) {
 //初始化定时器并且装填，启动
 void timer_reset(){
     BTIM_TimeBaseInitTypeDef BTIM_TimeBaseInitStruct;
-
+    // 1ms
     BTIM_TimeBaseInitStruct.BTIM_Mode = BTIM_Mode_TIMER;
     BTIM_TimeBaseInitStruct.BTIM_Period = 1000;
-    BTIM_TimeBaseInitStruct.BTIM_Prescaler = BTIM_PRS_DIV256;
+    BTIM_TimeBaseInitStruct.BTIM_Prescaler = BTIM_PRS_DIV64;
 
     BTIM_TimeBaseInit(CW_BTIM1, &BTIM_TimeBaseInitStruct);
     BTIM_ITConfig(CW_BTIM1, BTIM_IT_OV, ENABLE);

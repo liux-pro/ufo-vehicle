@@ -547,6 +547,11 @@
               <FileType>1</FileType>
               <FilePath>.\User\src\motor.c</FilePath>
             </File>
+            <File>
+              <FileName>fast_hsv2rgb_8bit.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\User\src\fast_hsv2rgb_8bit.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

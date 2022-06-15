@@ -15,6 +15,7 @@
 #include "cw32f030_flash.h"
 #include "cw32f030_btim.h"
 #include "LEGEND.H"
+#include "fast_hsv2rgb.h"
 /******************************************************************************
  * Local pre-processor symbols/macros ('#define')
  ******************************************************************************/
@@ -45,24 +46,44 @@
  ******************************************************************************/
 
 
+/*
+ * 流水灯
+ */
+void rolling() {
+    BTIM_TimeBaseInitTypeDef BTIM_TimeBaseInitStruct;
+    BTIM_TimeBaseInitStruct.BTIM_Mode = BTIM_Mode_TIMER;
+    BTIM_TimeBaseInitStruct.BTIM_Period = 100;
+    BTIM_TimeBaseInitStruct.BTIM_Prescaler = BTIM_PRS_DIV32768;
+
+    BTIM_TimeBaseInit(CW_BTIM2, &BTIM_TimeBaseInitStruct);
+    BTIM_ITConfig(CW_BTIM2, BTIM_IT_OV, ENABLE);
+    BTIM_Cmd(CW_BTIM2, ENABLE);
+    __RCC_BTIM_CLK_ENABLE();
+    NVIC_EnableIRQ(BTIM2_IRQn);
+
+}
+
+void BTIM2_IRQHandler(void) {
+    /* USER CODE BEGIN */
+    BTIM_ClearITPendingBit(CW_BTIM2, BTIM_IT_OV);
+    uint8_t old[24];
+    memcpy(old, ws2812_get_buffer() + (LED_NUMBER - 1) * 24, 24);
+    memmove(ws2812_get_buffer() + 24, ws2812_get_buffer(), (LED_NUMBER - 1) * 24);
+    memcpy(ws2812_get_buffer(), old, 24);
+    ws2812_send_sync();
+    /* USER CODE END */
+}
+
 /**
  ******************************************************************************
  ** \brief  Main function of project
  **
  ** \return uint32_t return value, if needed
  **
- ** 基于官方示例,制作本本模板，带所有外设驱动；整个项目编码转为utf-8。
- ** cw32f030_iwdt.c 编译报错，不过我用不到，不去管他了
- ** Starup里面是启动文件吧，不太懂，不要动就好
  ** Libraries里面是外设驱动库文件，用到什么就include对应的头文件，不要动
- ** User里面是代码，main.c里写程序。interrupt_cw32f030.c里面是所有的中断函数
- ** 示例电灯程序，PC13的LED闪烁。无需外部晶振。
  ** 下载器为daplink，无需额外设置，直接点下载应该就能下。
  **
  ******************************************************************************/
-
-
-
 int32_t main(void) {
     set_clock_64m();
 
@@ -72,8 +93,13 @@ int32_t main(void) {
 
 
     ws2812_init();
-    ws2812_set_color(0, 255, 0, 0);
-    ws2812_send_sync();
+    uint8_t r, g, b;
+    for (int i = 0; i < LED_NUMBER; ++i) {
+        fast_hsv2rgb_8bit((HSV_HUE_MAX >> 3) * i, HSV_SAT_MAX, HSV_VAL_MAX / 4, &r,
+                          &g, &b);
+        ws2812_set_color((i) % LED_NUMBER, r, g, b);
+    }
+    rolling();
 
     while (1) {
         static uint8_t *ble_data;
@@ -82,8 +108,22 @@ int32_t main(void) {
             if (ble_grep_receiver(ble_data) == LEGEND_DEVICE_CURRENT) {
                 switch (ble_grep_command(ble_data)) {
                     case LEGEND_CMD_SET_SPEED:
-                        motor_set_speed(&ble_data[3],2);
+                        motor_set_speed(&ble_data[3], 2);
                         break;
+                    case LEGEND_CMD_SET_LED: {
+                        //3是通信协议的前三位 数据太少就跳过
+                        if (ble_data_len < LED_NUMBER + 3) {
+                            continue;
+                        }
+                        uint8_t *hue = &ble_data[3];
+                        for (int i = 0; i < LED_NUMBER; ++i) {
+                            fast_hsv2rgb_8bit((*(hue++)) * 6, HSV_SAT_MAX, HSV_VAL_MAX / 4, &r,
+                                              &g, &b);
+                            //应该不会有线程冲突吧
+                            ws2812_set_color(i, r, g, b);
+                        }
+                        break;
+                    }
                 }
             }
         }

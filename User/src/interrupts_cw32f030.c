@@ -325,15 +325,15 @@ void GTIM4_IRQHandler(void)
 //  /* USER CODE END */
 //}
 
-/**
- * @brief This funcation handles BTIM2
- */
-void BTIM2_IRQHandler(void)
-{
-  /* USER CODE BEGIN */
-
-  /* USER CODE END */
-}
+///**
+// * @brief This funcation handles BTIM2
+// */
+//void BTIM2_IRQHandler(void)
+//{
+//  /* USER CODE BEGIN */
+//
+//  /* USER CODE END */
+//}
 
 /**
  * @brief This funcation handles BTIM3

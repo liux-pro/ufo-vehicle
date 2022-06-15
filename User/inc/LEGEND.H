@@ -17,7 +17,9 @@
 #define LEGEND_CMD_SET_TIME 0x00
 #define LEGEND_CMD_GET_TIME 0x01
 #define LEGEND_CMD_ADV_TEMPERATURE_HUMIDITY 0x02
+//第一个字节按位表示正反转，后边字节表示每个每个电机的速度。
 #define LEGEND_CMD_SET_SPEED 0x03
-
+//0-255 色调，设置8个led的颜色。
+#define LEGEND_CMD_SET_LED 0x04
 
 #endif /* LEGEND_H_ */

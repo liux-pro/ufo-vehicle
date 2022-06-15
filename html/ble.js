@@ -1,5 +1,6 @@
-let serviceUuid = 0xFFE0;
-let characteristicUuid = 0xFFE1;
+let serviceUuid = 0xFFFF;
+let characteristicUuid = 0xFFFF;
+let connected = false;
 
 function log(s) {
     console.log(s)
@@ -7,7 +8,7 @@ function log(s) {
 
 let characteristic_uart = null;
 
-function ble_init(deviceName) {
+function ble_init(deviceName, callback) {
     navigator.bluetooth.requestDevice({filters: [{name: deviceName}], optionalServices: [serviceUuid]})
         .then(device => {
             log('Connecting to GATT Server...');
@@ -39,9 +40,14 @@ function ble_init(deviceName) {
             return characteristic.readValue();
         }).then(value => {
         console.log(value.getUint8(0))
+        connected = true
+        if (callback) {
+            callback();
+        }
     })
         .catch(error => {
             log('Argh! ' + error);
+            alert("出错了")
         });
 }
 
@@ -52,11 +58,19 @@ function ble_init(deviceName) {
 //         })
 // }
 
-let count = 1
+let ble_send_busy = true;
 
-function ble_write() {
-    let temp = Uint8Array.of(count++);
-    characteristic_uart.writeValue(temp)
+function ble_write(data) {
+    if (ble_send_busy) {
+        ble_send_busy=false
+        characteristic_uart.writeValue(data).then(_ => {
+                ble_send_busy = true
+            }
+        ).catch(_ => {
+                ble_send_busy = true
+            }
+        )
+    }
 }
 
 function ble_notify() {
