@@ -61,6 +61,7 @@ function ble_init(deviceName, callback) {
 let ble_send_busy = true;
 
 function ble_write(data) {
+    // characteristic_uart.writeValue(data)
     if (ble_send_busy) {
         ble_send_busy=false
         characteristic_uart.writeValue(data).then(_ => {
@@ -70,6 +71,8 @@ function ble_write(data) {
                 ble_send_busy = true
             }
         )
+    }else {
+        console.log("busy")
     }
 }
 

@@ -273,20 +273,22 @@
                     ble_init("UFO Vehicle",()=>{
                         setInterval(()=>{
                             let gamepads = navigator.getGamepads ? navigator.getGamepads() : (navigator.webkitGetGamepads ? navigator.webkitGetGamepads : []);
-                            if (gamepads[0].buttons[4].pressed) {
-                                //蓝色
-                                ble_write(build_led_data(0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA))
-                                return;
-                            }
-                            if (gamepads[0].buttons[5].pressed) {
-                                //红色
-                                ble_write(build_led_data(0,0,0,0,0,0,0,0))
-                                return;
-                            }
-                            if (gamepads[0].buttons[0].pressed) {
-                                //红色
-                                ble_write(build_led_data(0,32,32*2,32*3,32*4,32*5,32*6,32*7))
-                                return;
+                            if (gamepads[0]){
+                                if (gamepads[0].buttons[4].pressed) {
+                                    //蓝色
+                                    ble_write(build_led_data(0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA,0xAA))
+                                    return;
+                                }
+                                if (gamepads[0].buttons[5].pressed) {
+                                    //红色
+                                    ble_write(build_led_data(0,0,0,0,0,0,0,0))
+                                    return;
+                                }
+                                if (gamepads[0].buttons[0].pressed) {
+                                    //红色
+                                    ble_write(build_led_data(0,32,32*2,32*3,32*4,32*5,32*6,32*7))
+                                    return;
+                                }
                             }
 
                                 ble_write(build_speed_data(that.accelerator,that.accelerator))
