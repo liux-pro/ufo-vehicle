@@ -5,7 +5,7 @@
 /*
  * 通过串口与蓝牙芯片ch571k通讯。
  *
- * 定时器超时时间设为n毫秒（这里实际设置为n=1），超时后计时器停止
+ * 定时器超时时间设为n毫秒（这里实际设置为n=4），超时后计时器停止
  *
  * 串口接收数据时，收到第一个数据时启动定时器，以后只要接到数据，
  * 就重置定时器，保证定时器在接收数据时一直不会溢出。
@@ -64,11 +64,15 @@ void timer_reset(){
     BTIM_TimeBaseInit(CW_BTIM1, &BTIM_TimeBaseInitStruct);
     BTIM_ITConfig(CW_BTIM1, BTIM_IT_OV, ENABLE);
     BTIM_Cmd(CW_BTIM1, ENABLE);
+    NVIC_EnableIRQ(BTIM1_IRQn);
+
 }
 
 //关闭定时器
 void timer_stop(){
     BTIM_Cmd(CW_BTIM1, DISABLE);
+    BTIM_ITConfig(CW_BTIM1, BTIM_IT_OV, DISABLE);
+    NVIC_DisableIRQ(BTIM1_IRQn);
 }
 
 
@@ -116,7 +120,6 @@ void ble_init() {
      * 初始化定时器btim1
      */
     __RCC_BTIM_CLK_ENABLE();
-    NVIC_EnableIRQ(BTIM1_IRQn);
 }
 
 

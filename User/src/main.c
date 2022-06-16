@@ -52,7 +52,7 @@
 void rolling() {
     BTIM_TimeBaseInitTypeDef BTIM_TimeBaseInitStruct;
     BTIM_TimeBaseInitStruct.BTIM_Mode = BTIM_Mode_TIMER;
-    BTIM_TimeBaseInitStruct.BTIM_Period = 100;
+    BTIM_TimeBaseInitStruct.BTIM_Period = 800;
     BTIM_TimeBaseInitStruct.BTIM_Prescaler = BTIM_PRS_DIV32768;
 
     BTIM_TimeBaseInit(CW_BTIM2, &BTIM_TimeBaseInitStruct);
@@ -60,17 +60,16 @@ void rolling() {
     BTIM_Cmd(CW_BTIM2, ENABLE);
     __RCC_BTIM_CLK_ENABLE();
     NVIC_EnableIRQ(BTIM2_IRQn);
-
 }
+
+volatile bool roll = false;
 
 void BTIM2_IRQHandler(void) {
     /* USER CODE BEGIN */
-    BTIM_ClearITPendingBit(CW_BTIM2, BTIM_IT_OV);
-    uint8_t old[24];
-    memcpy(old, ws2812_get_buffer() + (LED_NUMBER - 1) * 24, 24);
-    memmove(ws2812_get_buffer() + 24, ws2812_get_buffer(), (LED_NUMBER - 1) * 24);
-    memcpy(ws2812_get_buffer(), old, 24);
-    ws2812_send_sync();
+    if (BTIM_GetITStatus(CW_BTIM2, BTIM_IT_OV)) {
+        BTIM_ClearITPendingBit(CW_BTIM2, BTIM_IT_OV);
+        roll = true;
+    }
     /* USER CODE END */
 }
 
@@ -102,6 +101,26 @@ int32_t main(void) {
     rolling();
 
     while (1) {
+        if (roll) {
+            roll = false;
+            uint8_t old[24];
+            //TODO debug 一用memcpy串口就什么都收不到了 暂时用for循环去写
+//            memcpy(old, ws2812_get_buffer(), 24);
+//            memmove(ws2812_get_buffer() + 24, ws2812_get_buffer(), (LED_NUMBER - 1) * 24);
+//            memcpy(ws2812_get_buffer() + (LED_NUMBER - 1) * 24, old, 24);
+            for (int i = 0; i < 24; ++i) {
+                old[i] = ws2812_get_buffer()[i];
+            }
+            for (int i = 0; i < LED_NUMBER - 1; ++i) {
+                for (int j = 0; j < 24; ++j) {
+                    ws2812_get_buffer()[i * 24 + j] = ws2812_get_buffer()[i * 24 + j + 24];
+                }
+            }
+            for (int i = 0; i < 24; ++i) {
+                ws2812_get_buffer()[(LED_NUMBER - 1) * 24 + i] = old[i];
+            }
+            ws2812_send_sync();
+        }
         static uint8_t *ble_data;
         static uint16_t ble_data_len;
         if (ble_get_data(&ble_data, &ble_data_len)) {
